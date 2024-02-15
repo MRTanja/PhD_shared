@@ -86,10 +86,11 @@ conf_norm_sum = pd.DataFrame({'Sub': conf_norm.sum().index, 'Confluence_norm_sum
 slice_count = confluence_df.apply(lambda x: (x > 0).sum())
 slice_count_df = pd.DataFrame({'Sub': confluence_df.columns, 'Nonzero_slices': slice_count}).reset_index(drop=True)
 
-merged_1 = pd.merge(conf_sum, vol_sum, on='Sub', how='inner')
-merged_2 = pd.merge(merged_1, conf_norm_sum, on='Sub', how='inner')
-final_output = pd.merge(merged_2, slice_count_df, on='Sub', how='inner')
-final_output['Confluence_norm_scaled'] = final_output['Confluence_norm_sum']/(30.20349728*final_output['Nonzero_slices'])
+dfs = [conf_sum, vol_sum, conf_norm_sum, slice_count_df]
+confluence_final = reduce(lambda left,right: pd.merge(left,right,on=['Sub'],
+                                                how='inner'), dfs)
+confluence_final['Confluence_norm_scaled'] = confluence_final['Confluence_norm_sum']/(30.20349728*confluence_final['Nonzero_slices'])
 
-# final_output = dataframe with one row per subject, contains all metrics (I left everything in for sanity checks),
+
+# confluence_final = dataframe with one row per subject, contains all metrics (I left everything in for sanity checks),
 # the relevant one is in the last column: Confluence_norm_scaled, this will be a value between 0 and 1
