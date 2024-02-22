@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 import nibabel as nib
 import glob
+from functools import reduce
 
 # Function calculate_confluence calculates the metric for one slice
 s = 0.05 # Defines width of Gaussian kernel, this was the optimal value in my tests
