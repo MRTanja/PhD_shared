@@ -6,7 +6,7 @@
 # This script takes WMH segmentations (binarized or non-binarized) and calculates a 
 # confluence metric for each subject, in 3D
 
-# Changes you'll need to make so that script works with your paths/filenames: lines 58, 61 and 66
+# Changes you'll need to make so that script works with your paths/filenames: lines 63, 66, 70
 
 import numpy as np
 import pandas as pd
@@ -60,7 +60,7 @@ def calculate_volume(image):
 
 
 # Load images, run function calculate_confluence while looping through subjects and slices:
-base_dir = f'/home/ts887/rds/hpc-work/BIANCA/BIANCA_output/' # Change to your directory that contains images
+base_dir = '/home/ts887/rds/hpc-work/BIANCA/BIANCA_output/' # Change to your directory that contains images
 confluence_df = pd.DataFrame()
 volume_df = pd.DataFrame()
 for sub in glob.glob(base_dir + '*thr06.nii.gz'): # Change '*thr06*' to string that all image filenames contain
