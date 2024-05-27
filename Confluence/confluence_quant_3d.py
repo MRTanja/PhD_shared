@@ -75,7 +75,7 @@ for sub in glob.glob(base_dir + '*thr06.nii.gz'): # Change '*thr06*' to string t
 
 
 # Output so far: confluence_df and volume_df = dataframes with one row per subject,
-# containing the confluence metric for that slice and the number of WMH voxels
+# containing the confluence metric and the number of WMH voxels
 
 confluence_final = pd.merge(confluence_df, volume_df, on='WBIC_ID', how='inner')
 # Normalize confluence metric with WMH volume
