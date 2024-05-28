@@ -59,7 +59,7 @@ def calculate_volume(image):
     return volume
 
 
-# Load images, run function calculate_confluence while looping through subjects and slices:
+# Load images, run function calculate_confluence while looping through subjects:
 base_dir = '/home/ts887/rds/hpc-work/BIANCA/BIANCA_output/' # Change to your directory that contains images
 WM = ['d','pv'] # Deep and periventricular white matter
 input_dict = {}
