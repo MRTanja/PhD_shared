@@ -27,7 +27,7 @@
 
 # In order to obtain <structural image>_vent.nii.gz: apply make_bianca_mask to T1 images, and for that you will first
 # need to run fsl_anat on T1 images to create required input: 
-# CSF partial volume estimation (*pve_0.nii.gz) and warp file MNI2structural (*MNI_to_T1_nonlin_field.nii.gz)
+# bias-corrected T1 (*biascorr.nii.gz), CSF partial volume estimation (*pve_0.nii.gz) and warp file MNI2structural (*MNI_to_T1_nonlin_field.nii.gz)
 
 #################################################################################################################################################
 
@@ -35,22 +35,22 @@
 import os
 import glob
 
-base_dir = '/home/ts887/rds/hpc-work/BIANCA/BIANCA_images/CUH_BIDS/'
+base_dir = '/home/ts887/rds/hpc-work/BIANCA/BIANCA_images/CUH_BIDS/' # Change to path containing your subject directories
 
 
 # Run fsl_anat on T1 images to create input necessary for make_bianca_mask
 for sub in glob.glob(base_dir + 'sub-*/ses-*/anat/'):
-    t1 = glob.glob(sub + '*rec-norm_T1w.nii.gz')[0].split('.nii.gz', 1)[0]
-    com = 'fsl_anat --nosubcortseg -i ' + t1
-    print(com)
-    res = os.system(com)
+    t1 = glob.glob(sub + '*rec-norm_T1w.nii.gz')[0].split('.nii.gz', 1)[0] # Change to string that identifies T1 images
+    com = 'fsl_anat --nosubcortseg -i ' + t1 # Create command
+    print(com) # Check command
+    res = os.system(com) # Run command in subshell
 
 
 # Create ventmask with make_bianca_mask and input from fsl_anat
 for anat in glob.glob(base_dir + 'sub-*/ses-*/anat/*T1w.anat/'):
-    t1_biascorr = glob.glob(anat + '*biascorr.nii.gz')[0].split('.nii.gz', 1)[0]
-    pve = glob.glob(anat + '*pve_0.nii.gz')[0].split('.nii.gz', 1)[0]
-    mni_to_t1_field = glob.glob(anat + '*MNI_to_T1_nonlin_field.nii.gz')[0].split('.nii.gz', 1)[0]
+    t1_biascorr = glob.glob(anat + '*biascorr.nii.gz')[0].split('.nii.gz', 1)[0] # Change to string that identifies bias-corrected T1 images
+    pve = glob.glob(anat + '*pve_0.nii.gz')[0].split('.nii.gz', 1)[0] # Change to string that identifies CSF partial volume estimation
+    mni_to_t1_field = glob.glob(anat + '*MNI_to_T1_nonlin_field.nii.gz')[0].split('.nii.gz', 1)[0] # Change to string that identifies warp file
     com = 'make_bianca_mask ' + t1_biascorr + ' ' + pve + ' ' + mni_to_t1_field + ' 0'
     print(com)
     res = os.system(com)
@@ -58,8 +58,8 @@ for anat in glob.glob(base_dir + 'sub-*/ses-*/anat/*T1w.anat/'):
 
 # Register ventmask to FLAIR
 for sub in glob.glob(base_dir + 'sub-*/ses-*/anat/'):
-    flair_candidate = glob.glob(sub + '*rec-norm_FLAIR.nii.gz')
-    t1_candidate = glob.glob(sub + '*anat/T1.nii.gz')
+    flair_candidate = glob.glob(sub + '*rec-norm_FLAIR.nii.gz') # Change to string that identifies FLAIR image or whichever image was used for WMH segmentation
+    t1_candidate = glob.glob(sub + '*anat/T1.nii.gz') # Change to string that identifies T1 images
     if flair_candidate and t1_candidate: # Check if all necessary files exist
         flair = flair_candidate[0].split('.nii.gz', 1)[0]
         t1 = t1_candidate[0].split('.nii.gz', 1)[0]
@@ -71,9 +71,9 @@ for sub in glob.glob(base_dir + 'sub-*/ses-*/anat/'):
 
 
 for sub in glob.glob(base_dir + 'sub-*/ses-*/anat/'):
-    flair_candidate = glob.glob(sub + '*rec-norm_FLAIR.nii.gz')
-    ventmask_candidate = glob.glob(sub + '*anat/*ventmask.nii.gz')
-    mat_candidate = glob.glob(sub + '*anat/T1_to_FLAIR.mat')
+    flair_candidate = glob.glob(sub + '*rec-norm_FLAIR.nii.gz') # Change to string that identifies FLAIR image or whichever image was used for WMH segmentation
+    ventmask_candidate = glob.glob(sub + '*anat/*ventmask.nii.gz') # Change to string that identifies ventricle mask created by make_bianca_mask
+    mat_candidate = glob.glob(sub + '*anat/T1_to_FLAIR.mat') # Change to string that identifies transformation matrix from T1 to FLAIR space created in previous step
     print(mat_candidate)
     if flair_candidate and ventmask_candidate and mat_candidate:
         flair = flair_candidate[0].split('.nii.gz', 1)[0]
@@ -86,9 +86,9 @@ for sub in glob.glob(base_dir + 'sub-*/ses-*/anat/'):
         print(f'No matching file found in {sub}')
 
 
-# Run distancemap on registered ventricle masks, output: *dist_to_vent.nii.gz where intensity of each voxel represent its distance in mm from ventricles mask
+# Run distancemap on post-registration ventricle masks, output: *dist_to_vent.nii.gz where intensity of each voxel represent its distance in mm from ventricles mask
 for sub in glob.glob(base_dir + 'sub-*/ses-*/anat/*T1w.anat/'):
-    ventmask_candidate = glob.glob(sub + '*ventmask_to_FLAIR.nii.gz')
+    ventmask_candidate = glob.glob(sub + '*ventmask_to_FLAIR.nii.gz') # Change to string that identifies post-registration ventricle mask
     if ventmask_candidate:
         ventmask = ventmask_candidate[0].split('.nii.gz', 1)[0]
         com = 'distancemap -i ' + ventmask + ' -o ' + ventmask + '_dist_to_vent'
@@ -100,7 +100,7 @@ for sub in glob.glob(base_dir + 'sub-*/ses-*/anat/*T1w.anat/'):
 
 # Threshold distance map to create two separate maps (periventricular WM = within 5 voxels around ventricles, deep WM = outside of that)
 for sub in glob.glob(base_dir + 'sub-*/ses-*/anat/*T1w.anat/'):
-    distmap_candidate = glob.glob(sub + '*dist_to_vent.nii.gz')
+    distmap_candidate = glob.glob(sub + '*dist_to_vent.nii.gz') # Change to string that identifies distance map created in previous step
     if distmap_candidate:
         distmap = distmap_candidate[0].split('.nii.gz', 1)[0]
         com = 'fslmaths ' + distmap + ' -uthr 5 -bin ' + distmap + '_pv'
@@ -115,8 +115,8 @@ for sub in glob.glob(base_dir + 'sub-*/ses-*/anat/*T1w.anat/'):
 
 # Add periventricular WM mask to ventricle mask to create new pv WM mask (to make sure no WMH voxels at the very edge of ventricles are left out)
 for sub in glob.glob(base_dir + 'sub-*/ses-*/anat/*T1w.anat/'):
-    pv_candidate = glob.glob(sub + '*_vent_pv.nii.gz')
-    ventmask_candidate = glob.glob(sub + '*ventmask_to_FLAIR.nii.gz')
+    pv_candidate = glob.glob(sub + '*_vent_pv.nii.gz') # Change to string that identifies periventricular WM mask created in previous step
+    ventmask_candidate = glob.glob(sub + '*ventmask_to_FLAIR.nii.gz') # Change to string that identifies post-registration ventricle mask
     if pv_candidate and ventmask_candidate:
         pv = pv_candidate[0].split('.nii.gz', 1)[0]
         ventmask = ventmask_candidate[0].split('.nii.gz',1)[0]
@@ -130,9 +130,9 @@ for sub in glob.glob(base_dir + 'sub-*/ses-*/anat/*T1w.anat/'):
 # Apply deep WM mask (d) and periventricular WM masks (pv) to BIANCA segmentation, or to the WMH segmentation that you have
 for sub in glob.glob(base_dir + 'sub-*/ses-*/anat/'):
     id = sub.split('sub-')[-1].split('/ses')[0]
-    bianca_candidate = glob.glob(f'/home/ts887/rds/hpc-work/BIANCA/BIANCA_CUH_output/*{id}_thr06.nii.gz') # Use WMH segmentation here
-    pv_candidate = glob.glob(sub + '*anat/*vent_pv_full.nii.gz')
-    d_candidate = glob.glob(sub + '*anat/*vent_d.nii.gz')
+    bianca_candidate = glob.glob(f'/home/ts887/rds/hpc-work/BIANCA/BIANCA_CUH_output/*{id}_thr06.nii.gz') # # Change to path that contains whole-brain WMH segmentations and to string that identifies them
+    pv_candidate = glob.glob(sub + '*anat/*vent_pv_full.nii.gz') # Change to string that identifies mask for periventricular WM + ventricles created in previous step
+    d_candidate = glob.glob(sub + '*anat/*vent_d.nii.gz') # Change to string that identifies mask for deep WM
     if bianca_candidate and pv_candidate and d_candidate:
         bianca = bianca_candidate[0].split('.nii.gz', 1)[0]
         pv = pv_candidate[0].split('.nii.gz', 1)[0]
