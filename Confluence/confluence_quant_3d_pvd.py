@@ -61,8 +61,14 @@ def calculate_volume(image):
 
 # Load images, run function calculate_confluence while looping through subjects:
 base_dir = '/home/ts887/rds/hpc-work/BIANCA/BIANCA_output/' # Change to your directory that contains images
-WM = ['d','pv'] # Deep and periventricular white matter
+
+WM = ['d','pv'] # Deep and periventricular white matter;
+# this assumes you have two sets of WMH segmentations, one ending in *_d.nii.gz for hyperintensities in deep WM 
+# and one ending in *_pv.nii.gz for periventricular WM; the script WMH_segmentation_split.py generates these
+# two sets of segmentations from normal whole-brain WMH segmentations
+
 input_dict = {}
+
 for wm in WM:
     confluence_df = pd.DataFrame()
     volume_df = pd.DataFrame()
