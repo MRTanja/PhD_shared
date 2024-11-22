@@ -6,8 +6,7 @@
 # This script takes WMH segmentations (binarized or non-binarized) and calculates a 
 # confluence metric for each subject
 
-# Changes you'll need to make so that script works with your paths/filenames: lines 58, 61 and 66
-
+# Changes you'll need to make so that script works with your paths/filenames: lines 59, 62 and 67
 import numpy as np
 import pandas as pd
 import nibabel as nib
@@ -51,7 +50,7 @@ def calculate_confluence(image,slice,s):
 # Function calculate_volume calculates the number of WMH voxels in a slice
 def calculate_volume(image,slice):
     slice_data = pd.DataFrame(image[:,:,slice])
-    volume = np.count_nonzero(slice_data)
+    volume = slice_data.sum().sum()
     return volume
 
 
