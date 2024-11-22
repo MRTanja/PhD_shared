@@ -55,7 +55,7 @@ def calculate_confluence(image,s):
 
 # Function calculate_volume calculates the number of WMH voxels in a volume
 def calculate_volume(image):
-    volume = slice_data.sum().sum()
+    volume = image.sum().sum()
     return volume
 
 
